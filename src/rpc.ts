@@ -74,16 +74,12 @@ export default <A extends Schema>(endpoint: string) => ({
 				},
 				...(
 					rest.length !== 1 || paramExists ? {} : {
-						body: JSON.stringify(
-							options?.token ? { ...rest[0], i: localStorage.getItem("i") } : rest[0],
-						),
+						body: JSON.stringify(rest[0]),
 					}
 				),
 				...(
 					rest.length !== 2 ? {} : {
-						body: JSON.stringify(
-							options?.token ? { ...rest[1], i: localStorage.getItem("i") } : rest[1],
-						),
+						body: JSON.stringify(rest[1]),
 					}
 				),
 			});
