@@ -1,0 +1,17 @@
+{
+  "name": "meowo",
+  "version": "0.0.1-alpha.1",
+  "description": "me + owo",
+  "main": "build/index.js",
+  "repository": "git@github.com:yupix/meowo.git",
+  "author": "yupix <yupi0982@outlook.jp>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  },
+  "packageManager": "yarn@3.2.2",
+  "types": "./built/index.d.ts"
+}

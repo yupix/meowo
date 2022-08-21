@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "newLine": "lf",
+    "target": "ESNext",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "declaration": true,
+    "skipLibCheck": true,
+    "outDir": "./built/",
+  }
+}
