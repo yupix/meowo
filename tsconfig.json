@@ -9,5 +9,16 @@
     "declaration": true,
     "skipLibCheck": true,
     "outDir": "./built/",
-  }
+  },
+  "typeRoots": [
+    "node_modules/@types",
+    "src/@types",
+  ],
+  "include": [
+    "src/**/*",
+  ],
+  "exclude": [
+    "node_modules",
+    "test/**/*",
+  ]
 }
