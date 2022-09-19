@@ -20,14 +20,16 @@ type ExcludeUndefined<X> = X extends [undefined, undefined]
   ? [A, B]
   : never;
 
-const succeed = <A>(a: A) => ({
+const succeed = <A>(a: A, h?: Headers) => ({
   type: "succeeded" as const,
   data: a,
+  headers: h,
 });
 
-const fail = <A>(a: A) => ({
+const fail = <A>(a: A, h?: Headers) => ({
   type: "failed" as const,
   data: a,
+  headers: h,
 });
 
 export default <A extends Schema>(endpoint: string) => ({
@@ -64,7 +66,7 @@ export default <A extends Schema>(endpoint: string) => ({
 
       //@ts-ignore
       const q = QueryCreator(options?.query || {});
-      let contentType = 'text/plain'
+      let contentType = "text/plain";
       if (!options?.headers) {
         switch (method as string) {
           case "post": {
@@ -76,7 +78,7 @@ export default <A extends Schema>(endpoint: string) => ({
           }
         }
       }
-        (method as string) && "post" ? "application/json" : "";
+      (method as string) && "post" ? "application/json" : "";
       const data = await fetch(`${endpoint}${appliedPath}${q ? "?" + q : q}`, {
         method: method as string,
         credentials:
@@ -98,27 +100,36 @@ export default <A extends Schema>(endpoint: string) => ({
             }),
       });
       if (data.status === 404) {
-        return fail({
-          type: "not-found",
-          data: "Not Found",
-        });
+        return fail(
+          {
+            type: "not-found",
+            data: "Not Found",
+          },
+          data.headers
+        );
       }
 
       try {
         return succeed(
-          (await data.json()) as A["resource"][Path][Method]["response"]
+          (await data.json()) as A["resource"][Path][Method]["response"],
+          data.headers
         );
       } catch (e) {
-        return fail({
-          type: "parse-error" as const,
-          data: e,
-        });
+        return fail(
+          {
+            type: "parse-error" as const,
+            data: e,
+          },
+          data.headers
+        );
       }
     } catch (e) {
-      return fail({
-        type: "network-error" as const,
-        data: e,
-      });
+      return fail(
+        {
+          type: "network-error" as const,
+          data: e,
+        }
+      );
     }
   },
 });
