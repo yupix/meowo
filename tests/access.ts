@@ -1,20 +1,15 @@
-import { apiClient } from "../src";
+import {apiClient} from "../built/index"
+import {ISchema} from "../built/types"
 
 
-type Schema = {
-    resource: {
-        "/api/hello": {
-            GET: {
-                response: {"message": "hello"};
-            };
-        };
+const api = apiClient<typeof Schema>("https://develop.sankosc.co.jp/apitest/api")
+api.call('GET', "/hello", {}).then((res) => {
+    if (res.type === 'succeeded'){
+        return (res.data.message)
+    }
+})
 
-    };
-  };
-  
-
-const api = apiClient<Schema>("https://develop.sankosc.co.jp/apitest")
-api.call('GET', "/api/hello", {}).then((res) => {
+api.call("POST", "/echo", {}, {message: "hello world"}).then((res) => {
     if (res.type === 'succeeded'){
         return (res.data.message)
     }
