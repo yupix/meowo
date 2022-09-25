@@ -43,8 +43,7 @@ export default <A extends Schema>(endpoint: string) => ({
     method: Method,
     path: Path,
     options?: {
-      isCokkieAuth?: boolean;
-      token?: boolean;
+      credentials?: RequestCredentials;
       query?: Query;
       headers?: HeadersInit;
     },
@@ -81,8 +80,7 @@ export default <A extends Schema>(endpoint: string) => ({
       (method as string) && "post" ? "application/json" : "";
       const data = await fetch(`${endpoint}${appliedPath}${q ? "?" + q : q}`, {
         method: method as string,
-        credentials:
-          options?.isCokkieAuth && options?.token ? "same-origin" : "omit",
+        credentials: options?.credentials ? options?.credentials : "omit",
         headers: options?.headers
           ? options.headers
           : {
@@ -124,12 +122,10 @@ export default <A extends Schema>(endpoint: string) => ({
         );
       }
     } catch (e) {
-      return fail(
-        {
-          type: "network-error" as const,
-          data: e,
-        }
-      );
+      return fail({
+        type: "network-error" as const,
+        data: e,
+      });
     }
   },
 });
