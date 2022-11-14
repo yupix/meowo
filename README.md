@@ -42,6 +42,32 @@ api.call("POST", "/echo", {}, {message: "hello world"}).then((res) => {
 
 ```
 
+## 注意事項
+
+### `content-type`はデフォルトで `text/plain` です
+
+変更する場合は以下のようにheaderを指定してください
+
+```ts
+await api.call('POST', '/api/re', {headers: {'content-type': 'application/json'}}, {text: 'hello world'})
+```
+
+### set-cookieが設定されない
+
+[MDN](https://developer.mozilla.org/ja/docs/Web/API/Fetch_API/Using_Fetch) からの引用になりますが、credentialsが`include`になっていないと設定されません。
+
+> credentials オプションを include に設定しない限り、fetch() は次のように動作します。
+>
+>-    オリジン間リクエストではクッキーを送信しません。
+>-    オリジン間のレスポンスでは、送り返されたクッキーを設定しません。
+>-    2018 年 8 月現在、既定の資格情報ポリシーは same-origin に変更されています。 Firefox もバージョン 61.0b13 で変更されました）。
+
+以下のように変更してください
+
+```ts
+await api.call('POST', '/api/auth/signin', {credentials: 'include', headers: {'content-type': 'application/json'}}, {username, password})
+```
+
 ## 謝辞
 
 このlibraryは [強力な型補完を行うRestAPI ClientをTypeScriptで実装した](https://blog.wh-plus.co.jp/entry/2020/12/21/104033) というWHITE PLUS TechBlog様の記事を参考に作成したライブラリです。
