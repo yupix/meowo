@@ -9,3 +9,7 @@ interface APIResponse<T> {
 type IsNeverType<T> = [T] extends [never] ? true : false;
 
 type StrictExtract<Union, Cond> = Cond extends Union ? Union : never;
+
+interface IHeaders extends Headers {
+  'Content-Type'?: string
+}

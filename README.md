@@ -46,10 +46,16 @@ api.call("POST", "/echo", {}, {message: "hello world"}).then((res) => {
 
 ### `content-type`はデフォルトで `text/plain` です
 
-変更する場合は以下のようにheaderを指定してください
+都度変更する場合は以下のようにheaderを指定してください
 
 ```ts
-await api.call('POST', '/api/re', {headers: {'content-type': 'application/json'}}, {text: 'hello world'})
+await api.call('POST', '/api/re', {headers: {'Content-type': 'application/json'}}, {text: 'hello world'})
+```
+
+全体で変更する場合は以下のようにApiClientの呼び出し方を変更してください
+
+```ts
+const api = apiClient<Schema>("https://develop.sankosc.co.jp/apitest/api", "application/json")
 ```
 
 ### set-cookieが設定されない

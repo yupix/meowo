@@ -32,7 +32,7 @@ const fail = <A>(a: A, h?: Headers) => ({
   headers: h,
 });
 
-export default <A extends Schema>(endpoint: string) => ({
+export default <A extends Schema>(endpoint: string, defaultContentType: string) => ({
   call: async <
     Method extends GrandChildren<A["resource"]>,
     Path extends Owns<A["resource"], Method>,
@@ -45,7 +45,7 @@ export default <A extends Schema>(endpoint: string) => ({
     options?: {
       credentials?: RequestCredentials;
       query?: Query;
-      headers?: HeadersInit;
+      headers?: IHeaders;
     },
     ...rest: ExcludeUndefined<[Params, Body]>
   ) => {
@@ -65,19 +65,13 @@ export default <A extends Schema>(endpoint: string) => ({
 
       //@ts-ignore
       const q = QueryCreator(options?.query || {});
-      let contentType = "text/plain";
-      if (!options?.headers) {
-        switch (method as string) {
-          case "post": {
-            contentType = "application/json";
-          }
+      
+      const contentType = options?.headers?.get('Content-type') || defaultContentType // content-typeを変更できるように
 
-          default: {
-            contentType = "text/plain";
-          }
-        }
+      if (options?.headers && options?.headers["Content-Type"] === undefined) { // headerをカスタムする際にcontent-typeが無かったらデフォルトを追加する
+        options.headers.append('Content-Type', contentType)
       }
-      (method as string) && "post" ? "application/json" : "";
+
       const data = await fetch(`${endpoint}${appliedPath}${q ? "?" + q : q}`, {
         method: method as string,
         credentials: options?.credentials ? options?.credentials : "omit",
