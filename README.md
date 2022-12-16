@@ -49,7 +49,7 @@ api.call("POST", "/echo", { body: { message: "hello world" }}).then((res) => {
 都度変更する場合は以下のようにheaderを指定してください
 
 ```ts
-await api.call('POST', '/api/re', {headers: {'Content-type': 'application/json'}}, {text: 'hello world'})
+await api.call('POST', '/api/re', {headers: {'Content-type': 'application/json'}, body: {text: 'hello world'}})
 ```
 
 全体で変更する場合は以下のようにApiClientの呼び出し方を変更してください
