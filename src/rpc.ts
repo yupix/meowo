@@ -27,9 +27,16 @@ const fail = <A>(a: A, h?: Headers) => ({
   data: a,
   headers: h,
 });
-
-export default <A extends Schema>(endpoint: string, defaultContentType: string) => ({
-  call: async <
+export class rpc<A extends Schema>{
+  endpoint: string
+  defaultContentType: string
+  pendingApiRequestsCount: number
+  constructor(endpoint: string, defaultContentType: string) {
+    this.endpoint = endpoint
+    this.defaultContentType = defaultContentType
+    this.pendingApiRequestsCount = 0
+  }
+  async call<
     Method extends GrandChildren<A["resource"]>,
     Path extends Owns<A["resource"], Method>,
     Params extends Get<A["resource"][Path][Method], "params">,
@@ -45,7 +52,8 @@ export default <A extends Schema>(endpoint: string, defaultContentType: string) 
       query?: Query;
       headers?: IHeaders;
     },
-  ) => {
+  ) {
+    this.pendingApiRequestsCount++
     try {
       let appliedPath = path.toString();
 
@@ -62,20 +70,20 @@ export default <A extends Schema>(endpoint: string, defaultContentType: string) 
 
       //@ts-ignore
       const q = QueryCreator(options?.query || {});
-      
-      const contentType = options?.headers?.get('Content-type') || defaultContentType // content-typeを変更できるように
+
+      const contentType = options?.headers?.get('Content-type') || this.defaultContentType // content-typeを変更できるように
 
       if (options?.headers && options?.headers["Content-Type"] === undefined) { // headerをカスタムする際にcontent-typeが無かったらデフォルトを追加する
         options.headers.append('Content-Type', contentType)
       }
-      const data = await fetch(`${endpoint}${appliedPath}${q ? "?" + q : q}`, {
+      const data = await fetch(`${this.endpoint}${appliedPath}${q ? "?" + q : q}`, {
         method: method as string,
         credentials: options?.credentials ? options?.credentials : "omit",
         headers: options?.headers
           ? options.headers
           : {
-              "Content-Type": contentType,
-            },
+            "Content-Type": contentType,
+          },
         ...(options?.body
           ? {
             body: JSON.stringify(options?.body),
@@ -111,9 +119,11 @@ export default <A extends Schema>(endpoint: string, defaultContentType: string) 
         type: "network-error" as const,
         data: e,
       });
+    } finally {
+      this.pendingApiRequestsCount--
     }
-  },
-});
+  }
+};
 
 export type Schema = {
   resource: {
