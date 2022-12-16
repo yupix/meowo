@@ -10,14 +10,10 @@ type Owns<A extends {}, S extends string | symbol | number> = {
 
 type Get<A, K> = K extends keyof A ? A[K] : undefined;
 
-type ExcludeUndefined<X> = X extends [undefined, undefined]
-  ? []
-  : X extends [infer A, undefined]
-  ? [A]
-  : X extends [undefined, infer B]
-  ? [B]
-  : X extends [infer A, infer B]
-  ? [A, B]
+type ExcludeUndefined<X> = X extends undefined
+  ? never
+  : X extends infer A
+  ? A
   : never;
 
 const succeed = <A>(a: A, h?: Headers) => ({
@@ -43,11 +39,12 @@ export default <A extends Schema>(endpoint: string, defaultContentType: string) 
     method: Method,
     path: Path,
     options?: {
+      body?: ExcludeUndefined<Body>;
+      params?: ExcludeUndefined<Params>;
       credentials?: RequestCredentials;
       query?: Query;
       headers?: IHeaders;
     },
-    ...rest: ExcludeUndefined<[Params, Body]>
   ) => {
     try {
       let appliedPath = path.toString();
@@ -55,10 +52,10 @@ export default <A extends Schema>(endpoint: string, defaultContentType: string) 
       const paramExists = /:[a-zA-Z0-9]+/.test(appliedPath);
 
       if (paramExists) {
-        for (const name in rest[0]) {
+        for (const name in options?.params) {
           appliedPath = appliedPath.replace(
             new RegExp(`:${name}`),
-            (rest[0] as any)[name]
+            (options?.params as any)[name]
           );
         }
       }
@@ -71,7 +68,6 @@ export default <A extends Schema>(endpoint: string, defaultContentType: string) 
       if (options?.headers && options?.headers["Content-Type"] === undefined) { // headerをカスタムする際にcontent-typeが無かったらデフォルトを追加する
         options.headers.append('Content-Type', contentType)
       }
-
       const data = await fetch(`${endpoint}${appliedPath}${q ? "?" + q : q}`, {
         method: method as string,
         credentials: options?.credentials ? options?.credentials : "omit",
@@ -80,16 +76,11 @@ export default <A extends Schema>(endpoint: string, defaultContentType: string) 
           : {
               "Content-Type": contentType,
             },
-        ...(rest.length !== 1 || paramExists
-          ? {}
-          : {
-              body: JSON.stringify(rest[0]),
-            }),
-        ...(rest.length !== 2
-          ? {}
-          : {
-              body: JSON.stringify(rest[1]),
-            }),
+        ...(options?.body
+          ? {
+            body: JSON.stringify(options?.body),
+          }
+          : {}),
       });
       if (data.status === 404) {
         return fail(

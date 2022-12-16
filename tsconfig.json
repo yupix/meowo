@@ -9,6 +9,7 @@
     "declaration": true,
     "skipLibCheck": true,
     "outDir": "./built/",
+    "baseUrl": "./src"
   },
   "typeRoots": [
     "node_modules/@types",
