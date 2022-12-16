@@ -1,6 +1,6 @@
 {
   "name": "strictcat",
-  "version": "0.0.1-alpha.7",
+  "version": "0.0.1-alpha.10",
   "description": "Support type-safe RestFulAPI life",
   "main": "./built/index.js",
   "repository": "git@github.com:yupix/strictcat.git",
