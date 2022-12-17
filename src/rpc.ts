@@ -102,6 +102,17 @@ export class rpc<A extends Schema>{
         );
       }
 
+      if (400 >= data.status || data.status <= 500) {
+        return fail(
+          {
+            type: 'error',
+            data: await data.json()
+          },
+          data.headers,
+          data.status
+        )
+      }
+
       try {
         return succeed(
           (await data.json()) as A["resource"][Path][Method]["response"],
