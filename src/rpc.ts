@@ -16,16 +16,18 @@ type ExcludeUndefined<X> = X extends undefined
   ? A
   : never;
 
-const succeed = <A>(a: A, h?: Headers) => ({
+const succeed = <A>(a: A, h?: Headers, s?: number) => ({
   type: "succeeded" as const,
   data: a,
   headers: h,
+  status: s
 });
 
-const fail = <A>(a: A, h?: Headers) => ({
+const fail = <A>(a: A, h?: Headers, s?: number) => ({
   type: "failed" as const,
   data: a,
   headers: h,
+  status: s
 });
 export class rpc<A extends Schema>{
   endpoint: string
@@ -103,7 +105,8 @@ export class rpc<A extends Schema>{
       try {
         return succeed(
           (await data.json()) as A["resource"][Path][Method]["response"],
-          data.headers
+          data.headers,
+          data.status
         );
       } catch (e) {
         return fail(
@@ -111,7 +114,8 @@ export class rpc<A extends Schema>{
             type: "parse-error" as const,
             data: e,
           },
-          data.headers
+          data.headers,
+          data.status
         );
       }
     } catch (e) {
