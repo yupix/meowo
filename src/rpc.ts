@@ -20,23 +20,23 @@ const succeed = <A>(a: A, h?: Headers, s?: number) => ({
   type: "succeeded" as const,
   data: a,
   headers: h,
-  status: s
+  status: s,
 });
 
 const fail = <A>(a: A, h?: Headers, s?: number) => ({
   type: "failed" as const,
   data: a,
   headers: h,
-  status: s
+  status: s,
 });
-export class rpc<A extends Schema>{
-  endpoint: string
-  defaultContentType: string
-  pendingApiRequestsCount: number
+export class rpc<A extends Schema> {
+  endpoint: string;
+  defaultContentType: string;
+  pendingApiRequestsCount: number;
   constructor(endpoint: string, defaultContentType: string) {
-    this.endpoint = endpoint
-    this.defaultContentType = defaultContentType
-    this.pendingApiRequestsCount = 0
+    this.endpoint = endpoint;
+    this.defaultContentType = defaultContentType;
+    this.pendingApiRequestsCount = 0;
   }
   async call<
     Method extends GrandChildren<A["resource"]>,
@@ -53,9 +53,9 @@ export class rpc<A extends Schema>{
       credentials?: RequestCredentials;
       query?: Query;
       headers?: IHeaders;
-    },
+    }
   ) {
-    this.pendingApiRequestsCount++
+    this.pendingApiRequestsCount++;
     try {
       let appliedPath = path.toString();
 
@@ -73,25 +73,31 @@ export class rpc<A extends Schema>{
       //@ts-ignore
       const q = QueryCreator(options?.query || {});
 
-      const contentType = options?.headers?.get('Content-type') || this.defaultContentType // content-typeを変更できるように
+      const contentType =
+        (options?.headers && options?.headers["Content-Type"]) ||
+        this.defaultContentType; // content-typeを変更できるように
 
-      if (options?.headers && options?.headers["Content-Type"] === undefined) { // headerをカスタムする際にcontent-typeが無かったらデフォルトを追加する
-        options.headers.append('Content-Type', contentType)
+      if (options?.headers && options?.headers["Content-Type"] === undefined) {
+        // headerをカスタムする際にcontent-typeが無かったらデフォルトを追加する
+        options.headers.append("Content-Type", contentType);
       }
-      const data = await fetch(`${this.endpoint}${appliedPath}${q ? "?" + q : q}`, {
-        method: method as string,
-        credentials: options?.credentials ? options?.credentials : "omit",
-        headers: options?.headers
-          ? options.headers
-          : {
-            "Content-Type": contentType,
-          },
-        ...(options?.body
-          ? {
-            body: JSON.stringify(options?.body),
-          }
-          : {}),
-      });
+      const data = await fetch(
+        `${this.endpoint}${appliedPath}${q ? "?" + q : q}`,
+        {
+          method: method as string,
+          credentials: options?.credentials ? options?.credentials : "omit",
+          headers: options?.headers
+            ? options.headers
+            : {
+                "Content-Type": contentType,
+              },
+          ...(options?.body
+            ? {
+                body: JSON.stringify(options?.body),
+              }
+            : {}),
+        }
+      );
       if (data.status === 404) {
         return fail(
           {
@@ -105,12 +111,12 @@ export class rpc<A extends Schema>{
       if (400 <= data.status && data.status <= 500) {
         return fail(
           {
-            type: 'error',
-            data: await data.json()
+            type: "error",
+            data: await data.json(),
           },
           data.headers,
           data.status
-        )
+        );
       }
 
       try {
@@ -135,10 +141,10 @@ export class rpc<A extends Schema>{
         data: e,
       });
     } finally {
-      this.pendingApiRequestsCount--
+      this.pendingApiRequestsCount--;
     }
   }
-};
+}
 
 export type Schema = {
   resource: {
