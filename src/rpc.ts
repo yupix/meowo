@@ -31,12 +31,17 @@ const fail = <A>(a: A, h?: Headers, s?: number) => ({
 });
 export class rpc<A extends Schema> {
   endpoint: string;
-  defaultContentType: string;
   pendingApiRequestsCount: number;
-  constructor(endpoint: string, defaultContentType: string) {
+  config: { sharedBody?: { [key: string]: any }; contentType: string };
+  constructor(
+    endpoint: string,
+    config: { sharedBody?: { [key: string]: any }; contentType: string } = {
+      contentType: "text/plain",
+    }
+  ) {
     this.endpoint = endpoint;
-    this.defaultContentType = defaultContentType;
     this.pendingApiRequestsCount = 0;
+    this.config = config;
   }
   async call<
     Method extends GrandChildren<A["resource"]>,
@@ -58,6 +63,7 @@ export class rpc<A extends Schema> {
     this.pendingApiRequestsCount++;
     try {
       let appliedPath = path.toString();
+      let body = options?.body ? options?.body : {};
 
       const paramExists = /:[a-zA-Z0-9]+/.test(appliedPath);
 
@@ -75,7 +81,11 @@ export class rpc<A extends Schema> {
 
       const contentType =
         (options?.headers && options?.headers["Content-Type"]) ||
-        this.defaultContentType; // content-typeを変更できるように
+        this.config.contentType; // content-typeを変更できるように
+
+      if (this.config?.sharedBody) {
+        body = { ...body, ...this.config.sharedBody };
+      }
 
       if (options?.headers && options?.headers["Content-Type"] === undefined) {
         // headerをカスタムする際にcontent-typeが無かったらデフォルトを追加する
@@ -91,9 +101,9 @@ export class rpc<A extends Schema> {
             : {
                 "Content-Type": contentType,
               },
-          ...(options?.body
+          ...(body
             ? {
-                body: JSON.stringify(options?.body),
+                body: JSON.stringify(body),
               }
             : {}),
         }
