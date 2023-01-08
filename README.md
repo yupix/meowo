@@ -44,6 +44,16 @@ api.call("POST", "/echo", { body: { message: "hello world" }}).then((res) => {
 
 ## 便利機能
 
+### SharedBody
+
+最初にapiClientを初期化する際に渡すことで、全てのリクエストに対して同様のbodyを付与することが出来ます
+
+```ts
+apiClient<Schema>("", "POST", {
+  sharedBody: { token: "xxxxx" },
+});
+```
+
 ### assertIsSuccess
 
 指定したAPIのレスポンスが成功していると保証します。
