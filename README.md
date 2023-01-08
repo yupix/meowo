@@ -5,7 +5,7 @@
 ## 使い方
 
 ```ts
-import {apiClient} from "strictcat"
+import { apiClient } from "strictcat"
 
 type Schema = {
     resource: {
@@ -40,6 +40,41 @@ api.call("POST", "/echo", { body: { message: "hello world" }}).then((res) => {
 })
   
 
+```
+
+## 便利機能
+
+### assertIsSuccess
+
+指定したAPIのレスポンスが成功していると保証します。
+
+```ts
+import { apiClient, assertIsSuccess } from "strictcat"
+
+type Schema = {
+    resource: {
+        "/hello": {
+            GET: {
+                response: {"message": "hello"};
+            };
+        };
+        "/echo": {
+            POST: {
+                body: {
+                    "message": string
+                }
+                response: {"message": string}
+            }
+        }
+    };
+  };
+  
+const api = apiClient<Schema>("https://develop.sankosc.co.jp/apitest/api")
+
+api.call('GET', "/hello").then((res) => {
+    assertIsSuccess(res)
+    console.log(res.data.message)
+})
 ```
 
 ## 注意事項
