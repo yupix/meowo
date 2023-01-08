@@ -146,6 +146,21 @@ export class rpc<A extends Schema> {
   }
 }
 
+/**
+ * 指定されたレスポンスが成功かどうかを判断します
+ * @param data - APIのレスポンス
+ * @throws { Error } - APIのエラー
+ */
+export const assertIsSuccess = (
+  data: ReturnType<typeof fail> | ReturnType<typeof succeed>
+): asserts data is ReturnType<typeof succeed> => {
+  if (data.type === "failed") {
+    throw new Error(
+      typeof data.data === "string" ? data.data : JSON.stringify(data.data)
+    );
+  }
+};
+
 export type Schema = {
   resource: {
     [path: string]: {
