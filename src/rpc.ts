@@ -32,10 +32,10 @@ const fail = <A>(a: A, h?: Headers, s?: number) => ({
 export class rpc<A extends Schema> {
   endpoint: string;
   pendingApiRequestsCount: number;
-  config: { sharedBody?: { [key: string]: any }; contentType: string };
+  config: { sharedBody?: { [key: string]: any }; contentType?: string };
   constructor(
     endpoint: string,
-    config: { sharedBody?: { [key: string]: any }; contentType: string } = {
+    config: { sharedBody?: { [key: string]: any }; contentType?: string } = {
       contentType: "text/plain",
     }
   ) {
@@ -101,11 +101,11 @@ export class rpc<A extends Schema> {
             : {
                 "Content-Type": contentType,
               },
-          ...(body
-            ? {
-                body: JSON.stringify(body),
-              }
-            : {}),
+          ...(body &&
+            String(method).toLowerCase() !== "get" &&
+            String(method).toLowerCase() !== "head" && {
+              body: JSON.stringify(body),
+            }),
         }
       );
       if (data.status === 404) {
