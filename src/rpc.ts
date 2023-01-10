@@ -16,6 +16,10 @@ type ExcludeUndefined<X> = X extends undefined
   ? A
   : never;
 
+interface IHeaders {
+  [key: string]: string;
+}
+
 const succeed = <A>(a: A, h?: Headers, s?: number) => ({
   type: "succeeded" as const,
   data: a,
@@ -81,7 +85,8 @@ export class rpc<A extends Schema> {
 
       const contentType =
         (options?.headers && options?.headers["Content-Type"]) ||
-        this.config.contentType; // content-typeを変更できるように
+        this.config.contentType ||
+        "application/json"; // content-typeを変更できるように
 
       if (this.config?.sharedBody) {
         body = { ...body, ...this.config.sharedBody };
@@ -89,7 +94,7 @@ export class rpc<A extends Schema> {
 
       if (options?.headers && options?.headers["Content-Type"] === undefined) {
         // headerをカスタムする際にcontent-typeが無かったらデフォルトを追加する
-        options.headers.append("Content-Type", contentType);
+        options.headers["Content-Type"] = contentType;
       }
       const data = await fetch(
         `${this.endpoint}${appliedPath}${q ? "?" + q : q}`,
